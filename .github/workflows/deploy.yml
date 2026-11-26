@@ -1,0 +1,79 @@
+name: Deploy 农知行
+
+# push 到 main 自动部署；也可在 Actions 页面手动运行
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nongzhixing/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# 同一时间只跑一个部署，避免并发覆盖
+concurrency:
+  group: deploy-nongzhixing
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: 构建并部署到云服务器
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: nongzhixing/qian/package-lock.json
+
+      - name: 构建前端
+        working-directory: nongzhixing/qian
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f dist/index.html
+
+      - name: 打包制品（与 deploy-server.sh 约定一致）
+        working-directory: nongzhixing
+        run: |
+          tar -czf "$RUNNER_TEMP/nxz-deploy.tar.gz" \
+            --exclude='hou/.venv' \
+            --exclude='hou/runtime' \
+            --exclude='hou/.env' \
+            --exclude='hou/.idea' \
+            --exclude='__pycache__' \
+            --exclude='*.log' \
+            --exclude='*.tsbuildinfo' \
+            hou qian/dist deploy
+          ls -lh "$RUNNER_TEMP/nxz-deploy.tar.gz"
+
+      - name: 上传并部署
+        env:
+          SSH_HOST: ${{ secrets.NXZ_HOST }}
+          SSH_USER: ${{ secrets.NXZ_SSH_USER }}
+          SSH_KEY: ${{ secrets.NXZ_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SSH_HOST}" ] || [ -z "${SSH_USER}" ] || [ -z "${SSH_KEY}" ]; then
+            echo "::error::缺少仓库 Secrets：NXZ_HOST / NXZ_SSH_USER / NXZ_SSH_KEY（Settings → Secrets and variables → Actions）"
+            exit 1
+          fi
+          umask 077
+          mkdir -p ~/.ssh
+          # 兼容 Windows 复制过来的 CRLF 私钥
+          printf '%s\n' "${SSH_KEY}" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          if ! ssh-keyscan -H "${SSH_HOST}" 2>/dev/null | tee -a ~/.ssh/known_hosts | grep -q .; then
+            echo "::error::无法获取 ${SSH_HOST} 的 SSH 主机密钥，请确认服务器 22 端口可从公网访问"
+            exit 1
+          fi
+          SSH_OPTS=(-o StrictHostKeyChecking=yes -o ConnectTimeout=20 -i ~/.ssh/id_deploy)
+          scp "${SSH_OPTS[@]}" "$RUNNER_TEMP/nxz-deploy.tar.gz" "${SSH_USER}@${SSH_HOST}:/tmp/nxz-deploy.tar.gz"
+          ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" 'set -e; STAGE=/root/nxz-deploy-stage; rm -rf "$STAGE"; mkdir -p "$STAGE"; tar -xzf /tmp/nxz-deploy.tar.gz -C "$STAGE"; bash "$STAGE/deploy/deploy-server.sh" "$STAGE"; rm -f /tmp/nxz-deploy.tar.gz'
