@@ -26,47 +26,15 @@ npm.cmd run dev -- --strictPort
 
 首次缺少依赖时：在 hou 目录用 Python 3.11+ 创建 `.venv`，执行 `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`；在 qian 目录执行 `npm.cmd install`。
 
-## 本机上线部署（无域名，局域网访问）
+## 数据备份与安全
 
-不购买域名时，也可以在本机以生产模式运行：前端构建为静态文件，由 FastAPI 同源托管，只占用一个端口（默认 8080），同一局域网的手机或电脑用 `http://电脑IP:8080` 访问。开发模式（5173 + 8000 + 热更新）不受影响。
-
-### 一键启动
-
-1. 确认本地 MySQL（phpstudy）已启动；Redis 可由脚本按 `hou/runtime/redis-install.txt` 自动拉起。
-2. 双击 `启动上线版.cmd`。脚本会：
-   - 检查 MySQL 3306、Redis 6379；
-   - 当 `qian/src`、`index.html` 或 `package.json` 比 `dist` 新时自动执行 `npm run build`（也可运行 `powershell -File .\启动上线版.ps1 -Rebuild` 强制构建）；
-   - 以 `uvicorn app.serve:app --host 0.0.0.0 --port 8080` 隐藏启动，日志写入 `hou/runtime/backend-prod-*.log`；
-   - 输出本机与局域网访问地址。
-3. 首次跨设备访问前，右键 `放行局域网端口.cmd` →「以管理员身份运行」，放行 TCP 8080。**不要**放行 3306 或 6379。
-
-访问地址：
-
-- 本机：`http://127.0.0.1:8080`
-- 局域网：`http://<电脑局域网IP>:8080`（脚本会自动打印，例如 `http://172.20.10.4:8080`）
-- 接口文档：`http://127.0.0.1:8080/docs`
-
-### 停止 / 开机自启 / 备份
-
-- 停止：双击 `停止上线版.cmd`，按 `hou/runtime/production.pid` 结束整个进程树。
-- 开机自启：双击 `开机自启.cmd` 注册登录时任务；取消执行 `powershell -ExecutionPolicy Bypass -File .\开机自启.ps1 -Remove`。
 - 备份：运行 `备份数据.ps1`（需输入 MySQL 密码），导出到 `backups/<时间>/`：数据库 SQL、`hou/runtime/uploads`、`.jwt-secret`、`.env`。
-
-### 上线相关改动
-
-- 新增 `hou/app/serve.py`：托管 `qian/dist`，保留 `/api` 与 `/_AMapService`，为 `/trace/xxx` 等前端路由做 SPA 回退；未知 `/api` 路径仍返回 JSON 404。原开发入口 `app.main:app` 不变。
-- 溯源二维码不再写死 `127.0.0.1:5173`，默认按访问者当前地址生成；也可在 `hou/.env` 设置 `PUBLIC_BASE_URL` 固定二维码地址。
-- 前端接口原本使用相对路径 `/api`，同源部署无需改代码。
-
-### 注意事项
-
-- 无域名且未备案时外网无法直接访问，只能在同一局域网或手机热点内使用。需要公网访问时，应使用已备案域名 + HTTPS 的云服务器，或临时使用内网穿透工具（仅演示用）。
-- **演示账号密码**：`farmer` / `regulator` / `admin` 默认 `demo123`，且本项目按需求以明文保存密码。允许局域网访问前请在系统内修改密码，不要把服务暴露到不可信网络。
+- 上传附件在 `hou/runtime/uploads`，数据库在 MySQL `nongzhixing` 库，二者必须一起备份；`.env` 与 `runtime/.jwt-secret` 须保密，不要提交 Git。
+- **演示账号密码**：`farmer` / `regulator` / `admin` 默认 `demo123`，且本项目按需求以明文保存密码。对外访问前请在系统内修改，不要把服务暴露到不可信网络。
 - **MySQL 监听地址**：phpstudy 的 MySQL 当前监听 `0.0.0.0:3306`。请确保 Windows 防火墙未放行 3306，或把 MySQL 改为仅监听 `127.0.0.1`。
-- **高德地图 Key**：JS API Key 需要配置域名白名单；通过局域网 IP 访问时可能报 `INVALID_USER_DOMAIN`。演示时可将该 Key 白名单设为「不限制」，或使用已加入白名单的域名/`localhost` 访问。
-- **微信小程序**：真机调试时把 `xcx/miniprogram/utils/config.js` 的地址改为 `http://<电脑IP>:8080/api`，并在开发者工具中勾选「不校验合法域名」；正式发布仍要求 HTTPS + 已备案域名。
-- 局域网 IP 由路由器 DHCP 分配，重启后可能变化；需要固定地址时在路由器中为这台电脑绑定静态 IP。
-- 上传附件在 `hou/runtime/uploads`，数据库在 MySQL `nongzhixing` 库，二者必须一起备份。
+- **高德地图 Key**：JS API Key 需要配置域名白名单；换地址访问时可能报 `INVALID_USER_DOMAIN`，可将白名单设为「不限制」或加入实际访问域名。
+- **微信小程序**：真机调试时把 `xcx/miniprogram/utils/config.js` 的地址改为后端实际地址，并在开发者工具中勾选「不校验合法域名」；正式发布仍要求 HTTPS + 已备案域名。
+- 云端自动部署流程见 [自动部署操作手册](deploy/自动部署操作手册.md)。
 
 ## 核心流程演示
 
