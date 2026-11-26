@@ -1,0 +1,2 @@
+const {request,session}=require('../../utils/api')
+Page({data:{user:null,dash:null,error:'',busy:false},async onShow(){this.load()},async load(){if(this.data.busy)return;this.setData({busy:true,error:''});try{const user=await session();if(!user)return;this.setData({user,dash:await request('/dashboard')})}catch(e){this.setData({error:e.message})}finally{this.setData({busy:false});wx.stopPullDownRefresh()}},onPullDownRefresh(){this.load()},go(e){wx.navigateTo({url:e.currentTarget.dataset.url})},tab(e){wx.switchTab({url:e.currentTarget.dataset.url})}})

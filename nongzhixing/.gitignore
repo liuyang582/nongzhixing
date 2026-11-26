@@ -1,0 +1,35 @@
+node_modules/
+dist/
+.venv/
+.env
+*.db
+__pycache__/
+.pytest_cache/
+runtime/
+*.log
+
+# Local configuration and credentials
+.env.*
+!.env.example
+.jwt-secret
+*.pem
+*.key
+project.private.config.json
+
+# Local data, evidence, generated documents and temporary test environments
+outputs/
+nx-browser-acceptance-*/
+nx-test-*/
+*.sqlite
+*.sqlite3
+*.db-*
+*.sql
+*.dump
+*.tsbuildinfo
+*.pptx
+*.docx
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/

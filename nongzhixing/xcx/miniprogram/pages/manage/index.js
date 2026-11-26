@@ -1,0 +1,2 @@
+const {request,session}=require('../../utils/api')
+Page({data:{user:null,modules:[],error:''},async onShow(){try{const user=await session();if(!user)return;this.setData({user,modules:await request('/modules'),error:''})}catch(e){this.setData({error:e.message})}},go(e){wx.navigateTo({url:e.currentTarget.dataset.url})},record(e){const id=e.currentTarget.dataset.id;wx.navigateTo({url:id==='lands'?'/pages/index/index':id==='harvest'?'/pages/service/index?kind=harvest':id==='knowledge'?'/pages/knowledge/index':'/pages/records/index?module='+id})}})

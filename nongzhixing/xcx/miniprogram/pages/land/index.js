@@ -1,0 +1,14 @@
+const {request,session}=require('../../utils/api')
+const {mapData}=require('../../utils/geometry')
+Page({data:{row:null,fields:[],growth:[],tasks:[],markers:[],polygons:[],points:[],latitude:0,longitude:0,hasLocation:false,busy:false,error:'',relatedError:'',mapError:'',satellite:false},
+  onLoad(options){this.id=Number(options.id);this.load()},
+  async load(){if(this.data.busy)return;this.setData({busy:true,error:'',relatedError:'',mapError:''});try{const user=await session();if(!user)return;if(!Number.isInteger(this.id)||this.id<=0)throw new Error('地块编号无效');const modules=await request('/modules');const land=modules.find(m=>m.id==='lands')||(user.role==='regulator'?{fields:[{key:'crop',label:'作物'},{key:'area',label:'登记面积（亩）'},{key:'measured_area',label:'测算面积（亩）'},{key:'latitude',label:'纬度'},{key:'longitude',label:'经度'},{key:'note',label:'档案说明'}]}:null);if(!land)throw new Error('当前账号没有地块权限');const row=await this.find('/records/lands',this.id);if(!row)throw new Error('地块不存在或当前账号无权查看');const geo=mapData(row);const fields=land.fields.map(f=>({label:f.label,value:this.display(row.data[f.key])}));this.setData({row,fields,...geo});if(user.role==='regulator'||modules.some(m=>m.id==='growth')){try{const all=await this.all('/records/growth');this.setData({growth:all.filter(x=>Number(x.data.plot_id)===this.id)})}catch(e){this.setData({relatedError:e.message})}}if(user.role==='regulator'||modules.some(m=>m.id==='tasks')){try{const all=await this.all('/records/tasks');this.setData({tasks:all.filter(x=>Number(x.data.plot_id)===this.id)})}catch(e){this.setData({relatedError:e.message})}}}catch(e){this.setData({error:e.message})}finally{this.setData({busy:false});wx.stopPullDownRefresh()}},
+  async all(path){let rows=[],page=1;while(true){const r=await request(path+'?size=200&page='+page);rows=rows.concat(r.items);if(rows.length>=r.total||!r.items.length)return rows;page++}},
+  async find(path,id){let page=1;while(true){const r=await request(path+'?size=200&page='+page);const row=r.items.find(x=>x.id===id);if(row)return row;if(page*200>=r.total||!r.items.length)return null;page++}},
+  display(v){return v===null||v===undefined||v===''?'未登记':typeof v==='object'?JSON.stringify(v):String(v)},
+  onPullDownRefresh(){this.load()},
+  readyMap(){if(this.fitted)return;this.fitted=true;this.fit()},fit(){if(this.data.points.length)wx.createMapContext('land-map',this).includePoints({points:this.data.points,padding:[40,30,40,30],fail:()=>this.setData({mapError:'地图范围调整失败，可手动缩放'})})},
+  mapFail(){this.setData({mapError:'地图加载失败，请检查网络；档案仍可查看'})},
+  satellite(){this.setData({satellite:!this.data.satellite})},
+  openLocation(){if(!this.data.hasLocation)return;wx.openLocation({latitude:this.data.latitude,longitude:this.data.longitude,name:this.data.row.title,scale:16,fail:()=>wx.showToast({title:'无法打开位置，请重试',icon:'none'})})}
+})

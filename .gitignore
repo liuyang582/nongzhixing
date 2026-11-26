@@ -1,0 +1,43 @@
+# 本地运行时（Redis 二进制、日志等）
+.runtime/
+
+# AI 工具本地记忆
+.workbuddy/
+
+# 含服务器 IP / SSH / 账号信息的部署文档与本地配置，不对外发布
+农知行云服务器部署流程.md
+**/deploy.local.ps1
+
+# 操作系统杂项
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+.pytest_cache/
+
+# Node.js
+node_modules/
+dist/
+*.log
+*.tsbuildinfo
+
+# 环境变量与密钥
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.jwt-secret
+
+# IDE
+.idea/
+.vscode/

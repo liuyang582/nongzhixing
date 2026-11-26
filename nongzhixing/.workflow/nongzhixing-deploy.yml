@@ -1,0 +1,55 @@
+version: '1.0'
+name: nongzhixing-deploy
+displayName: 农知行-自动部署
+triggers:
+  trigger: auto
+  push:
+    branches:
+      precise:
+        - main
+stages:
+  - name: build
+    displayName: 构建前端
+    strategy: naturally
+    trigger: auto
+    steps:
+      - step: build@nodejs
+        name: build_frontend
+        displayName: Nodejs 构建
+        nodeVersion: 20.10.0
+        commands:
+          - npm config set registry https://registry.npmmirror.com
+          - cd qian && npm ci && npm run build
+        artifacts:
+          - name: BUILD_ARTIFACT
+            path:
+              - ./hou
+              - ./qian/dist
+              - ./deploy
+        caches:
+          - ~/.npm
+        strategy:
+          retry: '0'
+  - name: deploy
+    displayName: 部署到云服务器
+    strategy: naturally
+    trigger: auto
+    steps:
+      - step: deploy@agent
+        name: deploy_agent
+        displayName: 主机部署
+        hostGroupID: nongzhixing
+        deployArtifact:
+          - source: build
+            name: output
+            target: ~/gitee_go/deploy
+            dependArtifact: BUILD_ARTIFACT
+        script: |-
+          set -e
+          STAGE="${HOME:-/root}/gitee_go/deploy/stage"
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          tar -xzf "${HOME:-/root}/gitee_go/deploy/output.tar.gz" -C "$STAGE"
+          bash "$STAGE/deploy/deploy-server.sh" "$STAGE"
+        strategy:
+          retry: '0'

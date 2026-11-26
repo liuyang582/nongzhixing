@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/login/index",
+    "pages/home/index",
+    "pages/manage/index",
+    "pages/ai/index",
+    "pages/me/index",
+    "pages/index/index",
+    "pages/land/index",
+    "pages/records/index",
+    "pages/editor/index",
+    "pages/service/index",
+    "pages/knowledge/index"
+  ],
+  "window": {
+    "backgroundColor": "#f4f7f3",
+    "navigationBarBackgroundColor": "#f4f7f3",
+    "navigationBarTitleText": "农知行",
+    "navigationBarTextStyle": "black"
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "tabBar": {
+    "color": "#748277",
+    "selectedColor": "#246b47",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/manage/index",
+        "text": "生产管理"
+      },
+      {
+        "pagePath": "pages/ai/index",
+        "text": "AI 助手"
+      },
+      {
+        "pagePath": "pages/me/index",
+        "text": "我的"
+      }
+    ]
+  }
+}

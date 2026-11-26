@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>农业知识 RAG 语料库 · 体系总览</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --green-900:#1E3A28; --green-700:#2F5D3A; --green-500:#4F7D48;
+    --green-200:#C9D8BF; --green-50:#EEF3EA;
+    --earth:#B5762F; --earth-50:#FAF1E4;
+    --ink:#1B241E; --ink-2:#4A5750; --ink-3:#7C8A80;
+    --paper:#FBF9F4; --card:#FFFFFF; --line:#E3E0D6;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--paper); color:var(--ink); line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:0 32px;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:linear-gradient(150deg,#1E3A28 0%,#2F5D3A 60%,#3A6B45 100%);
+    color:#fff; padding:64px 0 56px; position:relative; overflow:hidden;
+  }
+  .hero::after{
+    content:""; position:absolute; right:-80px; top:-80px; width:420px; height:420px;
+    border-radius:50%; background:rgba(255,255,255,.04);
+  }
+  .hero .tag{
+    display:inline-block; font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:#C9D8BF; border:1px solid rgba(201,216,191,.4); padding:4px 12px; border-radius:2px;
+    margin-bottom:24px;
+  }
+  .hero h1{font-size:38px; font-weight:700; letter-spacing:.01em; line-height:1.3; margin-bottom:14px;}
+  .hero p{font-size:15px; color:#D5E0CE; max-width:680px; font-weight:300;}
+  .hero .meta{margin-top:28px; font-size:13px; color:#A8BC9E; display:flex; gap:24px; flex-wrap:wrap;}
+
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(255,255,255,.12);
+    margin-top:40px; border:1px solid rgba(255,255,255,.12); position:relative; z-index:1;}
+  .stat{background:rgba(30,58,40,.55); padding:22px 20px; backdrop-filter:blur(4px);}
+  .stat .n{font-size:32px; font-weight:700; letter-spacing:-.02em; line-height:1.1;}
+  .stat .n span{font-size:15px; font-weight:400; margin-left:3px; color:#C9D8BF;}
+  .stat .l{font-size:12px; color:#A8BC9E; margin-top:6px; letter-spacing:.06em;}
+
+  /* ---------- Section ---------- */
+  section{padding:56px 0;}
+  section + section{border-top:1px solid var(--line);}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:8px;}
+  .sec-num{font-size:12px; font-weight:700; color:var(--earth); letter-spacing:.1em;}
+  h2{font-size:22px; font-weight:700; letter-spacing:.01em;}
+  .sec-desc{font-size:14px; color:var(--ink-2); margin-bottom:28px; max-width:760px;}
+
+  /* ---------- Taxonomy ---------- */
+  .tax{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px;}
+  .tax-card{
+    background:var(--card); border:1px solid var(--line); border-radius:6px;
+    padding:18px 16px; transition:.2s;
+  }
+  .tax-card:hover{border-color:var(--green-500); transform:translateY(-2px); box-shadow:0 6px 18px rgba(47,93,58,.08);}
+  .tax-card .code{
+    font-size:20px; font-weight:700; color:var(--green-700); letter-spacing:.02em;
+  }
+  .tax-card .name{font-size:14px; font-weight:600; margin:4px 0 10px;}
+  .tax-card .cnt{font-size:12px; color:var(--ink-3);}
+  .tax-card .bar{height:3px; background:var(--green-50); border-radius:2px; margin-top:10px; overflow:hidden;}
+  .tax-card .bar i{display:block; height:100%; background:var(--green-700); border-radius:2px;}
+
+  /* ---------- Charts ---------- */
+  .charts{display:grid; grid-template-columns:1fr 1fr; gap:28px;}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:24px;}
+  .panel h3{font-size:14px; font-weight:600; margin-bottom:4px;}
+  .panel .sub{font-size:12px; color:var(--ink-3); margin-bottom:18px;}
+  .row{display:grid; grid-template-columns:76px 1fr 52px; align-items:center; gap:10px; margin-bottom:11px;}
+  .row .lb{font-size:12.5px; color:var(--ink-2);}
+  .row .tr{height:16px; background:#F2F1EA; border-radius:3px; overflow:hidden;}
+  .row .tr i{display:block; height:100%; border-radius:3px;}
+  .row .vl{font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--ink); text-align:right; font-weight:600;}
+  .c-a{background:var(--green-700);}
+  .c-b{background:var(--green-200);}
+  .c-s{background:var(--green-700);}
+  .c-y{background:#8FAF6E;}
+  .c-t{background:var(--earth);}
+  .c-hi{background:#A8412E;}
+  .c-mid{background:var(--earth);}
+  .c-lo{background:var(--green-200);}
+
+  /* ---------- Schema ---------- */
+  table{width:100%; border-collapse:collapse; font-size:13px; background:var(--card);}
+  thead th{
+    text-align:left; font-size:11.5px; font-weight:600; color:var(--ink-3);
+    letter-spacing:.08em; text-transform:uppercase; padding:10px 14px;
+    border-bottom:1px solid var(--line); background:#F6F4EE;
+  }
+  tbody td{padding:11px 14px; border-bottom:1px solid #F0EEE6; vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  code{
+    font-family:"SF Mono",Consolas,"Courier New",monospace; font-size:12px;
+    background:var(--green-50); color:var(--green-700); padding:2px 6px; border-radius:3px;
+  }
+  .req{color:#A8412E; font-size:11px; font-weight:700;}
+  .opt{color:var(--ink-3); font-size:11px;}
+
+  /* ---------- Steps ---------- */
+  .steps{display:grid; grid-template-columns:repeat(5,1fr); gap:0; margin-top:8px;}
+  .step{position:relative; padding:0 14px 0 0;}
+  .step::before{
+    content:""; position:absolute; left:0; top:23px; width:100%; height:1px; background:var(--line);
+  }
+  .step:last-child::before{display:none;}
+  .step .dot{
+    width:46px; height:46px; border-radius:50%; background:var(--card); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;
+    color:var(--green-700); position:relative; z-index:1; margin-bottom:14px;
+  }
+  .step .t{font-size:13.5px; font-weight:600; margin-bottom:4px;}
+  .step .d{font-size:12px; color:var(--ink-3); line-height:1.55;}
+
+  /* ---------- Callout ---------- */
+  .note{
+    background:var(--earth-50); border-left:3px solid var(--earth);
+    padding:16px 20px; border-radius:0 4px 4px 0; font-size:13.5px; color:#5A4326;
+    margin-top:24px;
+  }
+  .note b{color:var(--earth);}
+
+  /* ---------- Footer ---------- */
+  footer{padding:36px 0 56px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-3);}
+  footer .fl{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+
+  @media (max-width:860px){
+    .wrap{padding:0 20px;}
+    .hero h1{font-size:28px;}
+    .stats{grid-template-columns:1fr 1fr;}
+    .charts{grid-template-columns:1fr;}
+    .steps{grid-template-columns:1fr; gap:24px;}
+    .step::before{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="tag">Knowledge Corpus · v1.0</div>
+    <h1>农业知识 RAG 语料库</h1>
+    <p>以种植业为主体，覆盖设施农业、智慧农业与区域特色农业。每条知识独立成片、自带元数据、可溯源、带风险分级，直接切分即可入库。</p>
+    <div class="meta">
+      <span>编制：2026-11-05</span>
+      <span>方向：种植业 / 设施 / 特色农业</span>
+      <span>依据：农业农村部指导意见 · GB/GB-T · NY/T</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">96<span>条</span></div><div class="l">结构化知识条目</div></div>
+      <div class="stat"><div class="n">7<span>大类</span></div><div class="l">34 个二级分类</div></div>
+      <div class="stat"><div class="n">8.5<span>万字</span></div><div class="l">语料正文总量</div></div>
+      <div class="stat"><div class="n">100<span>%</span></div><div class="l">条目来源可追溯</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 分类体系 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>分类体系</h2></div>
+    <p class="sec-desc">三级分类，一级类作为路由、二级类作为元数据过滤条件、三级为具体知识条目。分类路径写入每条元数据，支持按领域精准召回。</p>
+    <div class="tax">
+      <div class="tax-card"><div class="code">A</div><div class="name">基础农艺</div><div class="cnt">31 条 · 土壤/肥料/水分/气象/种子</div><div class="bar"><i style="width:94%"></i></div></div>
+      <div class="tax-card"><div class="code">B</div><div class="name">作物栽培</div><div class="cnt">33 条 · 10 类作物全生育期</div><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="tax-card"><div class="code">C</div><div class="name">植物保护</div><div class="cnt">11 条 · 诊断/防控/安全用药</div><div class="bar"><i style="width:33%"></i></div></div>
+      <div class="tax-card"><div class="code">D</div><div class="name">设施与智慧农业</div><div class="cnt">9 条 · 环控/传感/物联网/标准</div><div class="bar"><i style="width:27%"></i></div></div>
+      <div class="tax-card"><div class="code">E</div><div class="name">区域特色农业</div><div class="cnt">4 条 · 产业载体/认证/区域模式</div><div class="bar"><i style="width:12%"></i></div></div>
+      <div class="tax-card"><div class="code">F</div><div class="name">政策法规</div><div class="cnt">4 条 · 法律/条例/标准体系</div><div class="bar"><i style="width:12%"></i></div></div>
+      <div class="tax-card"><div class="code">G</div><div class="name">质量安全</div><div class="cnt">4 条 · 农残/合格证/追溯/检测</div><div class="bar"><i style="width:12%"></i></div></div>
+    </div>
+  </section>
+
+  <!-- 统计 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>语料质量分布</h2></div>
+    <p class="sec-desc">三个维度共同决定一条知识在检索阶段的权重：权威等级用于冲突仲裁，时效类型决定缓存与下架策略，风险等级决定生成时是否强制加警示。</p>
+    <div class="charts">
+      <div class="panel">
+        <h3>权威等级</h3>
+        <div class="sub">A = 法规/国标/行标/部委文件</div>
+        <div class="row"><span class="lb">A 级</span><span class="tr"><i class="c-a" style="width:100%"></i></span><span class="vl">63</span></div>
+        <div class="row"><span class="lb">B 级</span><span class="tr"><i class="c-b" style="width:52%"></i></span><span class="vl">33</span></div>
+        <div class="row"><span class="lb">C 级</span><span class="tr"><i style="width:0%"></i></span><span class="vl">0</span></div>
+      </div>
+      <div class="panel">
+        <h3>时效类型</h3>
+        <div class="sub">决定更新频率与过期下架</div>
+        <div class="row"><span class="lb">稳定</span><span class="tr"><i class="c-s" style="width:100%"></i></span><span class="vl">80</span></div>
+        <div class="row"><span class="lb">年度更新</span><span class="tr"><i class="c-y" style="width:11%"></i></span><span class="vl">9</span></div>
+        <div class="row"><span class="lb">时效性</span><span class="tr"><i class="c-t" style="width:9%"></i></span><span class="vl">7</span></div>
+      </div>
+      <div class="panel">
+        <h3>风险等级</h3>
+        <div class="sub">高风险条目生成时强制附警示</div>
+        <div class="row"><span class="lb">高</span><span class="tr"><i class="c-hi" style="width:33%"></i></span><span class="vl">17</span></div>
+        <div class="row"><span class="lb">中</span><span class="tr"><i class="c-mid" style="width:100%"></i></span><span class="vl">51</span></div>
+        <div class="row"><span class="lb">低</span><span class="tr"><i class="c-lo" style="width:55%"></i></span><span class="vl">28</span></div>
+      </div>
+      <div class="panel">
+        <h3>条目规模</h3>
+        <div class="sub">单条正文 626 字符均值</div>
+        <div class="row"><span class="lb">A 基础</span><span class="tr"><i class="c-a" style="width:94%"></i></span><span class="vl">31</span></div>
+        <div class="row"><span class="lb">B 栽培</span><span class="tr"><i class="c-a" style="width:100%"></i></span><span class="vl">33</span></div>
+        <div class="row"><span class="lb">C 植保</span><span class="tr"><i class="c-y" style="width:33%"></i></span><span class="vl">11</span></div>
+        <div class="row"><span class="lb">D–G</span><span class="tr"><i class="c-lo" style="width:64%"></i></span><span class="vl">21</span></div>
+      </div>
+    </div>
+    <div class="note">
+      <b>一个刻意的取舍：</b>语料里不出现具体农药登记剂量，统一表述为「按标签登记剂量」。农药登记每几年就会调整，把剂量写死进语料，一旦变更，语料就从「权威」变成「错误的权威」——而在这个场景下，这种错误的代价是绝收或农残超标。
+    </div>
+  </section>
+
+  <!-- Schema -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>元数据 Schema</h2></div>
+    <p class="sec-desc">17 个字段，覆盖检索、过滤、重排、溯源、时效管理五个环节。其中 <code>queries</code> 与 <code>authority</code> 是农业 RAG 区别于通用 RAG 的两个关键字段。</p>
+    <table>
+      <thead><tr><th style="width:130px">字段</th><th style="width:70px">必填</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>doc_id</code></td><td class="req">是</td><td>全局唯一标识，格式「领域-主题-序号」，用于答案溯源与去重</td></tr>
+        <tr><td><code>title</code></td><td class="req">是</td><td>条目标题，参与向量化与目录检索</td></tr>
+        <tr><td><code>domain_l1</code> / <code>l2</code></td><td class="req">是</td><td>分类路径，作为元数据预过滤条件</td></tr>
+        <tr><td><code>crop</code></td><td class="opt">否</td><td>适用作物，避免「番茄问题召回大田方案」</td></tr>
+        <tr><td><code>region</code></td><td class="opt">否</td><td>适用区域，施肥量与播期存在强地域差异</td></tr>
+        <tr><td><code>stage</code> / <code>operation</code></td><td class="opt">否</td><td>生育期与农事环节，支撑「什么时候做什么」类查询</td></tr>
+        <tr><td><code>keywords</code></td><td class="req">是</td><td>专业检索词，供 BM25 召回，均值 7 个</td></tr>
+        <tr><td><code>queries</code></td><td class="req">是</td><td><b>用户口语化问法</b>，供查询扩展与相似度对齐，均值 4 条</td></tr>
+        <tr><td><code>content</code></td><td class="req">是</td><td>正文，单条 200–500 字即一个 chunk</td></tr>
+        <tr><td><code>source</code></td><td class="req">是</td><td>来源标注，覆盖率 100%</td></tr>
+        <tr><td><code>authority</code></td><td class="req">是</td><td><b>权威等级</b>，结论冲突时按此仲裁而非相似度</td></tr>
+        <tr><td><code>stability</code></td><td class="req">是</td><td>稳定 / 年度更新 / 时效性，决定缓存与下架</td></tr>
+        <tr><td><code>confidence</code></td><td class="req">是</td><td>高 / 中 / 低，低置信度条目在生成时降权</td></tr>
+        <tr><td><code>risk_level</code></td><td class="req">是</td><td><b>风险分级</b>，高风险强制附安全提示</td></tr>
+        <tr><td><code>valid_from</code></td><td class="opt">否</td><td>时效性知识的生效时间，到期自动降权</td></tr>
+        <tr><td><code>version</code></td><td class="req">是</td><td>条目版本，支持 diff 与历史回溯</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 建库流程 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>建库路径</h2></div>
+    <p class="sec-desc">不要先追条目数量。先用 100 条跑通「检索—重排—生成—溯源」闭环，验证切分粒度，再扩量。</p>
+    <div class="steps">
+      <div class="step"><div class="dot">01</div><div class="t">清洗切分</div><div class="d">按 <code>【条目】</code> 标记切，前缀拼「作物·主题」</div></div>
+      <div class="step"><div class="dot">02</div><div class="t">向量化</div><div class="d">BGE-M3 或同类中文模型，content + queries 一起编码</div></div>
+      <div class="step"><div class="dot">03</div><div class="t">混合召回</div><div class="d">BM25 攻专业词，向量攻口语，两路合并去重</div></div>
+      <div class="step"><div class="dot">04</div><div class="t">重排加权</div><div class="d">Rerank 后按权威等级、时效、风险二次加权</div></div>
+      <div class="step"><div class="dot">05</div><div class="t">生成约束</div><div class="d">数值带出处、高危前置警告、低分拒答</div></div>
+    </div>
+    <div class="note" style="margin-top:32px; background:var(--green-50); border-left-color:var(--green-700); color:#2A4231;">
+      <b>评估目标：</b>Recall@5 ≥ 0.85　·　MRR ≥ 0.70　·　答案忠实度 ≥ 0.90　·　高危项（农药剂量 / 间隔期 / 禁用名录）错答率 0
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap fl">
+    <span>农业知识 RAG 语料库 v1.0　·　96 条 / 8.5 万字</span>
+    <span>配套文件：农业知识RAG语料库_v1.md　·　data/agri_knowledge_v1.jsonl</span>
+  </div>
+</footer>
+
+</body>
+</html>

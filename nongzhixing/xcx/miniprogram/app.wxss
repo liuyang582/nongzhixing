@@ -1,0 +1,24 @@
+page{background:#f4f7f3;color:#243b2d;font-family:-apple-system,sans-serif;font-size:28rpx}.page{padding:32rpx 28rpx;padding-bottom:calc(36rpx + env(safe-area-inset-bottom))}.hero{padding:26rpx 4rpx 36rpx}.brand{color:#246b47;font-size:30rpx;font-weight:700;letter-spacing:4rpx}.title{font-size:46rpx;font-weight:700;margin:20rpx 0 12rpx}.muted{color:#748277;font-size:24rpx;line-height:1.7}.card{background:#fff;border:1rpx solid #e3ebe3;border-radius:24rpx;padding:30rpx;margin-bottom:24rpx}.row{display:flex;align-items:center;justify-content:space-between;gap:16rpx}.name{font-size:32rpx;font-weight:600;word-break:break-all;flex:1}.badge{background:#edf5ee;color:#246b47;padding:8rpx 14rpx;border-radius:10rpx;font-size:22rpx;flex-shrink:0}.demo{background:#fff5df;color:#986522}.label{color:#748277;font-size:24rpx;margin:24rpx 0 12rpx}input{height:88rpx;background:#f5f8f3;border:1rpx solid #e3ebe3;border-radius:14rpx;padding:0 22rpx;font-size:30rpx}button{font-size:28rpx;min-height:88rpx;border-radius:14rpx;margin:24rpx 0 0;background:#edf5ee;color:#246b47}button::after{border:0}.primary{background:#246b47;color:white}.error{color:#a23a32;background:#fff0ed;padding:22rpx;border-radius:14rpx;line-height:1.6;font-size:26rpx;margin-bottom:20rpx}.empty{text-align:center;padding:50rpx 20rpx;color:#748277}.section-title{font-size:32rpx;font-weight:600;margin-bottom:24rpx}.kv{display:flex;justify-content:space-between;gap:24rpx;padding:18rpx 0;border-bottom:1rpx solid #eef2ec;font-size:26rpx}.kv .key{color:#748277;flex-shrink:0;width:180rpx}.kv .value{word-break:break-all;text-align:right}.note{font-size:24rpx;color:#748277;line-height:1.8;margin-top:22rpx}.map{width:100%;height:600rpx;border-radius:18rpx;overflow:hidden}.link{color:#246b47;font-size:26rpx}.search{margin-bottom:20rpx}.actions{display:flex;gap:20rpx}.actions button{flex:1}.login-footer{text-align:center;margin-top:30rpx}.stats{display:flex;gap:20rpx;margin:24rpx 0}.stat{flex:1;background:#edf5ee;border-radius:16rpx;padding:22rpx}.stat-value{display:block;font-size:40rpx;font-weight:600}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20rpx}.grid .card{margin-bottom:0}.grid button{margin:0}.big{font-size:42rpx;font-weight:600;margin:18rpx 0}.menu-item{display:flex;justify-content:space-between;gap:22rpx;padding:26rpx 0;border-bottom:1rpx solid #edf0eb;line-height:1.6}.menu-item>text:first-child{flex:1;word-break:break-all}.picker{padding:24rpx;background:#f5f8f3;border:1rpx solid #e3ebe3;border-radius:14rpx;margin-top:12rpx}textarea{width:100%;min-height:180rpx;padding:22rpx;background:#f5f8f3;border:1rpx solid #e3ebe3;border-radius:14rpx;box-sizing:border-box;font-size:32rpx}.field-error{color:#a23a32;font-size:24rpx;margin-top:10rpx}.danger{color:#a23a32;background:#fff0ed}.photo{width:100%;margin-top:24rpx}.answer{display:block;white-space:pre-wrap;line-height:1.9;word-break:break-all;margin-top:24rpx}.grid+.card{margin-top:24rpx}
+
+/* 原生按钮的内在宽度不能撑开网格，所有业务模块统一计算内边距。 */
+view,text,button,input,textarea,picker,map,image{box-sizing:border-box}
+.page{width:100%;min-width:0}
+.card{width:100%;min-width:0}
+.grid{width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid>view,.grid>button{min-width:0;max-width:100%}
+button{max-width:100%;white-space:normal;word-break:break-word}
+.grid button{width:100%;padding:18rpx 12rpx;line-height:1.6;display:flex;align-items:center;justify-content:center}
+.actions{width:100%;min-width:0;align-items:stretch}
+.actions button{flex:1 1 0%;width:0;min-width:0;padding:18rpx 12rpx;line-height:1.6;display:flex;align-items:center;justify-content:center}
+input,textarea,.picker{width:100%;min-width:0;max-width:100%}
+.row,.kv,.menu-item,.stats{min-width:0;max-width:100%}
+.row .name,.menu-item>text:first-child,.stat{min-width:0}
+.kv .key{max-width:35%}
+.kv .value{flex:1;min-width:0}
+.menu-item>text:last-child{max-width:42%;text-align:right;word-break:break-word}
+.row button{flex-shrink:0;width:auto;margin:0;min-height:64rpx;padding:0 16rpx;line-height:64rpx}
+.stat{flex:1 1 0%;width:0}
+.big,.stat-value{word-break:break-all}
+.hero .title{word-break:break-word}

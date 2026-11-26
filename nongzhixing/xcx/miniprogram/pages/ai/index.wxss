@@ -1,0 +1,1 @@
+.ref{display:block;padding:20rpx;margin-top:14rpx;background:#f5f8f3;border:1rpx solid #e3ebe3;border-radius:14rpx}.ref-title{display:block;font-size:28rpx;font-weight:600;line-height:1.6;color:#243b2d}.ref-meta{display:block;font-size:22rpx;color:#748277;margin-top:8rpx;line-height:1.6}.ref-snippet{display:block;font-size:26rpx;color:#3d5546;line-height:1.8;margin-top:10rpx}
