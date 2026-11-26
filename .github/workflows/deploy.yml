@@ -65,15 +65,26 @@ jobs:
             echo "::error::缺少仓库 Secrets：NXZ_HOST / NXZ_SSH_USER / NXZ_SSH_KEY（Settings → Secrets and variables → Actions）"
             exit 1
           fi
+          # GitHub Secrets 原样保存，粘贴常带入空格/换行；这里统一去掉
+          SSH_HOST="$(printf '%s' "${SSH_HOST}" | tr -d '[:space:]')"
+          SSH_USER="$(printf '%s' "${SSH_USER}" | tr -d '[:space:]')"
+          if ! printf '%s' "${SSH_HOST}" | grep -qE '^[A-Za-z0-9.-]+$'; then
+            echo "::error::NXZ_HOST 含非法字符：只填 IP 或域名，不要带 http://、端口、引号、空格或换行"
+            exit 1
+          fi
+          if ! printf '%s' "${SSH_USER}" | grep -qE '^[A-Za-z0-9._-]+$'; then
+            echo "::error::NXZ_SSH_USER 含非法字符：应类似 root"
+            exit 1
+          fi
           umask 077
           mkdir -p ~/.ssh
           # 兼容 Windows 复制过来的 CRLF 私钥
           printf '%s\n' "${SSH_KEY}" | tr -d '\r' > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
           if ! ssh-keyscan -H "${SSH_HOST}" 2>/dev/null | tee -a ~/.ssh/known_hosts | grep -q .; then
-            echo "::error::无法获取 ${SSH_HOST} 的 SSH 主机密钥，请确认服务器 22 端口可从公网访问"
+            echo "::error::无法获取 SSH 主机密钥，请确认服务器 22 端口可从公网访问（安全组/防火墙）"
             exit 1
           fi
-          SSH_OPTS=(-o StrictHostKeyChecking=yes -o ConnectTimeout=20 -i ~/.ssh/id_deploy)
+          SSH_OPTS=(-o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o BatchMode=yes -i ~/.ssh/id_deploy)
           scp "${SSH_OPTS[@]}" "$RUNNER_TEMP/nxz-deploy.tar.gz" "${SSH_USER}@${SSH_HOST}:/tmp/nxz-deploy.tar.gz"
           ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" 'set -e; STAGE=/root/nxz-deploy-stage; rm -rf "$STAGE"; mkdir -p "$STAGE"; tar -xzf /tmp/nxz-deploy.tar.gz -C "$STAGE"; bash "$STAGE/deploy/deploy-server.sh" "$STAGE"; rm -f /tmp/nxz-deploy.tar.gz'
