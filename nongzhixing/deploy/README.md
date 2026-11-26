@@ -1,5 +1,7 @@
 # 部署说明
 
+完整的自动部署流程、验证、回滚与故障排查见 **[自动部署操作手册](自动部署操作手册.md)**。
+
 ## 一键部署（推荐）
 
 在 Windows 本地双击 `deploy.cmd`，或执行：
@@ -39,7 +41,7 @@ $sshKey  = Join-Path $HOME '.ssh/<你的私钥>'
 | --- | --- |
 | `NXZ_HOST` | 服务器 IP 或域名 |
 | `NXZ_SSH_USER` | `root` |
-| `NXZ_SSH_KEY` | 服务器 SSH 私钥**全文**（如 `~/.ssh/id_ed25519_nxz` 的内容，含 `-----BEGIN/END-----` 两行） |
+| `NXZ_SSH_KEY` | 服务器 SSH 私钥**全文**（含 `-----BEGIN/END-----` 两行） |
 
 说明：
 
